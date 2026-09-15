@@ -21,12 +21,14 @@ namespace practica4_JGED_Septiembre
 
         private void btnGuardar_Click(object sender, EventArgs e)
         {
-            String nombres = tbNombre.Text;
-            String apellidos = tbApellidos.Text;
-            String tel = tbTelefono.Text;
-            String edad = tbEdad.Text;
-            String estatura = tbEstatura.Text;
+            // Limpiamos los espacios en blanco sobrantes de los TextBoxes
+            String nombres = tbNombre.Text.Trim();
+            String apellidos = tbApellidos.Text.Trim();
+            String tel = tbTelefono.Text.Trim();
+            String edad = tbEdad.Text.Trim();
+            String estatura = tbEstatura.Text.Trim();
             String genero = "";
+
             if (rbFemenino.Checked)
             {
                 genero = "Femenino";
@@ -39,22 +41,38 @@ namespace practica4_JGED_Septiembre
             {
                 genero = "Otros";
             }
-            String Mensaje = $"Nombre: {nombres}\n\rApellidos: {apellidos}\n\rTeléfono: {tel}\n\rEdad: {edad}\n\rEstatura: {estatura}\n\rGénero: {genero}";
-            //Ruta de archivo using.System.IO
+
+            // Construcción del mensaje usando Environment.NewLine para mayor robustez
+            String Mensaje = $"Nombre: {nombres}{Environment.NewLine}" +
+                             $"Apellidos: {apellidos}{Environment.NewLine}" +
+                             $"Teléfono: {tel}{Environment.NewLine}" +
+                             $"Edad: {edad}{Environment.NewLine}" +
+                             $"Estatura: {estatura}{Environment.NewLine}" +
+                             $"Género: {genero}";
+
             String rutaArchivo = "C:\\Users\\patat\\source\\repos\\practica4-JGED_Septiembre\\registro.txt";
-            //Alternativas
-            bool archivoExiste = File.Exists(rutaArchivo);
-            //Instanciación de objeto escritor y verificación para ver si ya existe.
-            using (StreamWriter escritor = new StreamWriter(rutaArchivo, true))
+
+            try
             {
-                //Si el archivo ya existe, añadimos un separador antes del nuevo registro
-                if (archivoExiste)
+                // Verificamos si el archivo existe y contiene datos reales
+                bool archivoExiste = File.Exists(rutaArchivo) && new FileInfo(rutaArchivo).Length > 0;
+
+                // Uso de StreamWriter dentro de un bloque using para asegurar el cierre del recurso
+                using (StreamWriter escritor = new StreamWriter(rutaArchivo, true, Encoding.UTF8))
                 {
-                    escritor.WriteLine();
+                    if (archivoExiste)
+                    {
+                        escritor.WriteLine(); // Separador entre registros
+                    }
+                    escritor.WriteLine(Mensaje);
                 }
-                escritor.WriteLine(Mensaje);
+
+                MessageBox.Show(Mensaje, "Confirmación de registro", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            MessageBox.Show(Mensaje, "Confirmación de registro", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocurrió un error al guardar el archivo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnLimpiar_Click(object sender, EventArgs e)
