@@ -1,0 +1,34 @@
+﻿Nombre: Josue Gabriel
+Apellidos: Escobar Domínguez
+Teléfono: 9616036042
+Edad: 19
+Estatura: 1.71
+Género: Masculino
+
+Nombre: Josue Gabriel
+Apellidos: Escobar Domínguez
+Teléfono: 9616036042
+Edad: 19
+Estatura: 1.71
+Género: Masculino
+
+Nombre: Josue 1
+Apellidos: Domínguez
+Teléfono: 9616036042
+Edad: 9616036042
+Estatura: 1,70
+Género: Masculino
+
+Nombre: Josue 2
+Apellidos: Domínguez
+Teléfono: 9616036042
+Edad: 9616036042
+Estatura: 1,70
+Género: Masculino
+
+Nombre: Josue 3
+Apellidos: Domínguez
+Teléfono: 9616036042
+Edad: 9616036042
+Estatura: 1,70
+Género: Masculino
