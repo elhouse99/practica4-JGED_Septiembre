@@ -1,8 +1,12 @@
-﻿using System;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
+// Cambios
+using MySql.Data.MySqlClient;
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Drawing.Configuration;
 using System.IO;
@@ -17,6 +21,7 @@ namespace practica4_JGED_Septiembre
 {
     public partial class Form1 : Form
     {
+        string SQLConection = "Server=127.0.0.1; Port=3306; Database=ap_v1; Uid=root; Pwd=26060799;";
         public Form1()
         {
             InitializeComponent();
@@ -27,6 +32,28 @@ namespace practica4_JGED_Septiembre
             tbEdad.TextChanged += ValidarEdad;
             tbEstatura.TextChanged += ValidarEstatura;
             tbTelefono.Leave += ValidarTelefono;
+        }
+
+        private void insertarRegistros(string nombre, string apellidos, int edad, decimal estatura, string telefono, string genero)
+        {
+            using (MySqlConnection conectar = new MySqlConnection(SQLConection))
+            {
+                conectar.Open();
+                string insertQuery = "INSERT INTO registros (nombre, apellidos, telefono, estatura, edad, genero) " +
+                                     "VALUES (@nombre, @apellidos, @telefono, @estatura, @edad, @genero)";
+
+                using (MySqlCommand comando = new MySqlCommand(insertQuery, conectar))
+                {
+                    comando.Parameters.AddWithValue("@nombre", nombre);
+                    comando.Parameters.AddWithValue("@apellidos", apellidos);
+                    comando.Parameters.AddWithValue("@telefono", telefono);
+                    comando.Parameters.AddWithValue("@estatura", estatura);
+                    comando.Parameters.AddWithValue("@edad", edad);
+                    comando.Parameters.AddWithValue("@genero", genero);
+                    comando.ExecuteNonQuery();
+                }
+                conectar.Close();
+            }
         }
 
         private void ValidarTelefono(object sender, EventArgs e)
@@ -133,52 +160,34 @@ namespace practica4_JGED_Septiembre
             {
                 genero = "Otros";
             }
-            else
+
+            // Validación global añadida por el profesor (adaptada a tus métodos)
+            if (EsEnteroValido(edad) && EsDecimalValido(estatura) && TelefonoValido(tel) && EsTextoValido(nombres) && EsTextoValido(apellidos))
             {
-                MessageBox.Show("Por favor, seleccione un género.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return; // Interrumpe el guardado si no hay género
-            }
+                String Mensaje = $"Nombre: {nombres}\n\rApellidos: {apellidos}\n\rTeléfono: {tel}\n\rEdad: {edad}\n\rEstatura: {estatura}\n\rGénero: {genero}";
+                String rutaArchivo = "C:\\Users\\patat\\source\\repos\\practica4-JGED_Septiembre\\registro.txt";
 
-            // Validar que no haya datos vacíos
-            if (string.IsNullOrWhiteSpace(nombres) || string.IsNullOrWhiteSpace(apellidos) ||
-                string.IsNullOrWhiteSpace(tel) || string.IsNullOrWhiteSpace(edad) || string.IsNullOrWhiteSpace(estatura))
-            {
-                MessageBox.Show("Por favor, llene todos los campos correctamente antes de guardar.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // Uso de Environment.NewLine para correcta compatibilidad de saltos de línea en Windows
-            String Mensaje = $"Nombre: {nombres}{Environment.NewLine}" +
-                             $"Apellidos: {apellidos}{Environment.NewLine}" +
-                             $"Teléfono: {tel}{Environment.NewLine}" +
-                             $"Edad: {edad}{Environment.NewLine}" +
-                             $"Estatura: {estatura}{Environment.NewLine}" +
-                             $"Género: {genero}";
-
-            String rutaArchivo = @"C:\Users\patat\source\repos\practica4-JGED_Septiembre\registro.txt";
-
-            try
-            {
                 bool archivoExiste = File.Exists(rutaArchivo);
 
-                // Instanciación del objeto escritor con codificación explícita
-                using (StreamWriter escritor = new StreamWriter(rutaArchivo, true, Encoding.UTF8))
+                // 1. Guarda en el TXT (Tu lógica original)
+                using (StreamWriter escritor = new StreamWriter(rutaArchivo, true))
                 {
                     if (archivoExiste)
                     {
-                        escritor.WriteLine(); // Separador entre registros
+                        escritor.WriteLine();
                     }
                     escritor.WriteLine(Mensaje);
                 }
 
-                MessageBox.Show(Mensaje, "Confirmación de registro", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // 2. Inserta en la Base de Datos
+                insertarRegistros(nombres, apellidos, int.Parse(edad), decimal.Parse(estatura), tel, genero);
 
-                // Limpia el formulario sin pedir confirmación tras un guardado exitoso
-                LimpiarFormulario(pedirConfirmacion: false);
+                MessageBox.Show("Datos guardados en TXT y Base de Datos con éxito.", "Confirmación", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show($"Ocurrió un error al guardar el archivo: {ex.Message}", "Error de Sistema", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Mensaje de error si alguna validación falla
+                MessageBox.Show("Por favor, ingrese datos válidos en los campos antes de guardar.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
